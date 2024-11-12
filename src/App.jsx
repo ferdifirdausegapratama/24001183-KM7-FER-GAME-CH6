@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
@@ -26,17 +26,31 @@ import NavbarTailwind from "./components/navbar/navbarTailwind";
 // ])
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    setIsAuthenticated(false);
+  };
   return (
-    // <>
-    //   <RouterProvider router={router} />
-    // </>
     <>
-      <NavbarTailwind />
+      {isAuthenticated && <NavbarTailwind onLogout={handleLogout} />}
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/not-found" element={<NotFound />} />
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/"
+          element={isAuthenticated ? <Homepage /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/login"
+          element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />}
+        />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );
